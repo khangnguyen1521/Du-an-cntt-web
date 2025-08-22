@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Vùng Trồng</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-seedling"></i> Hệ Thống Quản Lý Vùng Trồng</h1>
+        </header>
+
+        <main>
+            <!-- Phần Thêm Mới -->
+            <section class="add-section">
+                <h2><i class="fas fa-plus-circle"></i> Thêm Vùng Trồng Mới</h2>
+                <button id="addNewBtn" class="btn btn-add">
+                    <i class="fas fa-plus"></i> Thêm Mới
+                </button>
+            </section>
+
+            <!-- Phần Tìm Kiếm -->
+            <section class="search-section">
+                <h2><i class="fas fa-search"></i> Tìm Kiếm Vùng Trồng</h2>
+                <form id="searchForm" class="search-form">
+                    <div class="form-group">
+                        <label for="searchName">Tên vùng trồng:</label>
+                        <input type="text" id="searchName" placeholder="Nhập tên vùng trồng...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="searchLocation">Địa điểm:</label>
+                        <input type="text" id="searchLocation" placeholder="Nhập địa điểm...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="searchCropType">Loại cây trồng:</label>
+                        <input type="text" id="searchCropType" placeholder="Nhập loại cây trồng...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="searchStatus">Trạng thái:</label>
+                        <select id="searchStatus">
+                            <option value="">Tất cả</option>
+                            <option value="active">Hoạt động</option>
+                            <option value="inactive">Không hoạt động</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-search">
+                            <i class="fas fa-search"></i> Tìm Kiếm
+                        </button>
+                        <button type="button" id="clearBtn" class="btn btn-clear">
+                            <i class="fas fa-times"></i> Xóa
+                        </button>
+                        <button type="button" id="loadAllBtn" class="btn btn-load">
+                            <i class="fas fa-list"></i> Tải Tất Cả
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Phần Hiển Thị Kết Quả -->
+            <section class="results-section">
+                <div class="results-header">
+                    <h2><i class="fas fa-table"></i> Kết Quả Tìm Kiếm</h2>
+                    <div class="results-count">
+                        Tìm thấy <span id="resultsCount">0</span> kết quả
+                    </div>
+                </div>
+                
+                <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Đang tải...
+                </div>
+                
+                <div class="table-container">
+                    <table id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên Vùng Trồng</th>
+                                <th>Địa Điểm</th>
+                                <th>Diện Tích (m²)</th>
+                                <th>Loại Cây Trồng</th>
+                                <th>Trạng Thái</th>
+                                <th>Ngày Tạo</th>
+                                <th>Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Kết quả sẽ được hiển thị ở đây -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="noResults" class="no-results" style="display: none;">
+                    <i class="fas fa-search"></i>
+                    <p>Không tìm thấy kết quả phù hợp với tìm kiếm của bạn.</p>
+                    <p>Vui lòng thử với từ khóa khác.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Chi Tiết -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Chi Tiết Vùng Trồng</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Chi tiết sẽ được hiển thị ở đây -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form Thêm/Sửa -->
+    <div id="formModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="formModalTitle">Thêm Vùng Trồng Mới</h3>
+                <span class="close" id="closeFormModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="regionForm" class="region-form">
+                    <input type="hidden" id="regionId" name="regionId">
+                    
+                    <div class="form-group">
+                        <label for="regionName">Tên vùng trồng: <span class="required">*</span></label>
+                        <input type="text" id="regionName" name="name" required placeholder="Nhập tên vùng trồng">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regionLocation">Địa điểm: <span class="required">*</span></label>
+                        <input type="text" id="regionLocation" name="location" required placeholder="Nhập địa điểm">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regionArea">Diện tích (m²): <span class="required">*</span></label>
+                        <input type="number" id="regionArea" name="area" required min="1" placeholder="Nhập diện tích">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regionCropType">Loại cây trồng: <span class="required">*</span></label>
+                        <input type="text" id="regionCropType" name="cropType" required placeholder="Nhập loại cây trồng">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regionStatus">Trạng thái: <span class="required">*</span></label>
+                        <select id="regionStatus" name="status" required>
+                            <option value="">Chọn trạng thái</option>
+                            <option value="active">Hoạt động</option>
+                            <option value="inactive">Không hoạt động</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-save">
+                            <i class="fas fa-save"></i> Lưu
+                        </button>
+                        <button type="button" class="btn btn-cancel" id="cancelFormBtn">
+                            <i class="fas fa-times"></i> Hủy
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Xác Nhận Xóa -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Xác Nhận Xóa</h3>
+                <span class="close" id="closeDeleteModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="delete-confirmation">
+                    <div class="delete-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <p>Bạn có chắc chắn muốn xóa vùng trồng:</p>
+                    <p class="delete-item-name" id="deleteItemName"></p>
+                    <p class="delete-warning">Hành động này không thể hoàn tác!</p>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-delete-confirm" id="confirmDeleteBtn">
+                        <i class="fas fa-trash"></i> Xóa
+                    </button>
+                    <button type="button" class="btn btn-cancel" id="cancelDeleteBtn">
+                        <i class="fas fa-times"></i> Hủy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
